@@ -36,21 +36,21 @@ class LifeGameMain:
 
     def _interact(self, state):
         (x, y) = self._cursor
-        if state.up:
+        if state.up.pressed():
             y = y + 1 if y < LifeGameMain.HEIGHT - 1 else 0
-        if state.down:
+        if state.down.pressed():
             y = y - 1 if y > 0 else LifeGameMain.HEIGHT - 1
-        if state.left:
+        if state.left.pressed():
             x = x - 1 if x > 0 else LifeGameMain.WIDTH - 1
-        if state.right:
+        if state.right.pressed():
             x = x + 1 if x < LifeGameMain.WIDTH - 1 else 0
         self._cursor = (x, y)
 
-        if state.button1:
+        if state.button1.down():
             status = self._lifegame.get(x, y)
             self._lifegame.set(x, y, not status)
             self._pause = True
-        if state.button4:
+        if state.button4.down():
             self._pause = not self._pause;
 
     def _draw(self):

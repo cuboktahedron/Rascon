@@ -11,28 +11,55 @@ class Joystick:
 
     def refresh(self):
         events = pygame.event.get()
+
+        left = self.state.left.pressed()
+        right = self.state.right.pressed()
+        down = self.state.down.pressed()
+        up = self.state.up.pressed()
+        button1 = self.state.button1.pressed()
+        button2 = self.state.button2.pressed()
+        button3 = self.state.button3.pressed()
+        button4 = self.state.button4.pressed()
+
         for ev in events:
             if ev.type == pygame.locals.JOYHATMOTION:
                 x, y = ev.value
-                self.state.left = x < 0
-                self.state.right = x > 0
-                self.state.down = y < 0
-                self.state.up = y > 0
+                left = x < 0
+                right = x > 0
+                down = y < 0
+                up = y > 0
             elif ev.type == pygame.locals.JOYBUTTONUP:
-                self.state.button1 = False if ev.button == 0 else self.state.button1
-                self.state.button2 = False if ev.button == 1 else self.state.button2
-                self.state.button3 = False if ev.button == 2 else self.state.button3
-                self.state.button4 = False if ev.button == 3 else self.state.button4
+                if ev.button == 0:
+                    button1 = False
+                if ev.button == 1:
+                    button2 = False
+                if ev.button == 2:
+                    button3 = False
+                if ev.button == 3:
+                    button4 = False
             elif ev.type == pygame.locals.JOYBUTTONDOWN:
-                self.state.button1 = True if ev.button == 0 else self.state.button1
-                self.state.button2 = True if ev.button == 1 else self.state.button2
-                self.state.button3 = True if ev.button == 2 else self.state.button3
-                self.state.button4 = True if ev.button == 3 else self.state.button4
+                if ev.button == 0:
+                    button1 = True
+                if ev.button == 1:
+                    button2 = True
+                if ev.button == 2:
+                    button3 = True
+                if ev.button == 3:
+                    button4 = True
+
+        self.state.left.refresh(left)
+        self.state.right.refresh(right)
+        self.state.down.refresh(down)
+        self.state.up.refresh(up)
+        self.state.button1.refresh(button1)
+        self.state.button2.refresh(button2)
+        self.state.button3.refresh(button3)
+        self.state.button4.refresh(button4)
 
         #    self.__show_events(events)
 
     def __str__(self):
-        return "name:{0} state:{1}".format(self.joy.get_name(), self.state)
+        return "name:{0}\n{1}".format(self.joy.get_name(), self.state)
 
     def __show_events(self, events):
         for ev in events:
@@ -55,20 +82,60 @@ class Joystick:
 
     class JoystickState:
         def __init__(self):
-            self.up = False
-            self.left = False
-            self.right = False
-            self.down = False
-            self.button1 = False
-            self.button2 = False
-            self.button3 = False
-            self.button4 = False
+            self.up = Joystick.ButtonStatus("up")
+            self.left = Joystick.ButtonStatus("left")
+            self.right = Joystick.ButtonStatus("right")
+            self.down = Joystick.ButtonStatus("down")
+            self.button1 = Joystick.ButtonStatus("BTN1")
+            self.button2 = Joystick.ButtonStatus("BTN2")
+            self.button3 = Joystick.ButtonStatus("BTN3")
+            self.button4 = Joystick.ButtonStatus("BTN4")
 
         def __str__(self):
-            return "up:{0} left:{1} right:{2} down:{3} BTN1:{4} BTN2:{5} BTN3:{6} BTN4:{7}".format(
-                T(self.up), T(self.left), T(self.right), T(self.down),
-                T(self.button1), T(self.button2), T(self.button3), T(self.button4))
+            return "{0}\n{1}\n{2}\n{3}\n{4}\n{5}\n{6}\n{7}".format(
+                self.up, self.down, self.left, self.right,
+                self.button1, self.button2, self.button3, self.button4)
 
+    class ButtonStatus:
+        def __init__(self, name):
+            self._name = name
+            self._pressed = False
+            self._button_up = False
+            self._button_down = False
+
+        def refresh(self, currentState):
+            if self._pressed:
+                if currentState:
+                    self._button_down = False
+                    self._button_up = False
+                else:
+                    self._button_down = False
+                    self._button_up = True
+            else:
+                if currentState:
+                    self._button_down = True
+                    self._button_up = False
+                else:
+                    self._button_down = False
+                    self._button_up = False
+
+            self._pressed = currentState
+
+        def pressed(self):
+            return self._pressed
+
+        def down(self):
+            return self._button_down
+
+        def up(self):
+            return self._button_up
+
+        def __str__(self):
+            return "{0} pressed:{1} up:{2} down:{3}".format(
+                self._name, self._T(self._pressed), self._T(self._button_up), self._T(self._button_down))
+
+        def _T(self, b):
+            return "T" if b else "F"
 
 def main():
     pygame.init()
@@ -80,9 +147,6 @@ def main():
         joy.refresh()
         print(joy)
         time.sleep(1 / 60)
-
-def T(b):
-    return "T" if b else "F"
 
 if __name__ == '__main__':
     try:
