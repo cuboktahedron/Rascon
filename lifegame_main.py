@@ -18,11 +18,13 @@ class LifeGameMain:
         self._ctx = lm.getContext()
 
         self._cursor = (0, 0)
+        self._pause = True
 
     def start(self):
         while True:
             self._joy.refresh()
-            self._lifegame.next()
+            if not self._pause:
+                self._lifegame.next()
 
             self._action()
             self._draw()
@@ -30,16 +32,26 @@ class LifeGameMain:
 
     def _action(self):
         state = self._joy.state
+        self._interact(state)
+
+    def _interact(self, state):
         (x, y) = self._cursor
         if state.up:
             y = y + 1 if y < LifeGameMain.HEIGHT - 1 else 0
-        elif state.down:
+        if state.down:
             y = y - 1 if y > 0 else LifeGameMain.HEIGHT - 1
-        elif state.left:
+        if state.left:
             x = x - 1 if x > 0 else LifeGameMain.WIDTH - 1
-        elif state.right:
+        if state.right:
             x = x + 1 if x < LifeGameMain.WIDTH - 1 else 0
         self._cursor = (x, y)
+
+        if state.button1:
+            status = self._lifegame.get(x, y)
+            self._lifegame.set(x, y, not status)
+            self._pause = True
+        if state.button4:
+            self._pause = not self._pause;
 
     def _draw(self):
        cells = self._lifegame.get_cells()

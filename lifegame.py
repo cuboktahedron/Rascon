@@ -9,6 +9,9 @@ class LifeGame:
   def set(self, x, y, status):
     self.cells[y][x] = status
 
+  def get(self, x, y):
+    return self.cells[y][x]
+
   def next(self):
     nextCells = [[False for x in range(0, self.width)] for y in range(0, self.height)]
 
