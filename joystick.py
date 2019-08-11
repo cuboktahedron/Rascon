@@ -21,9 +21,13 @@ class Joystick:
             elif ev.type == pygame.locals.JOYBUTTONUP:
                 self.state.button1 = False if ev.button == 0 else self.state.button1
                 self.state.button2 = False if ev.button == 1 else self.state.button2
+                self.state.button3 = False if ev.button == 2 else self.state.button3
+                self.state.button4 = False if ev.button == 3 else self.state.button4
             elif ev.type == pygame.locals.JOYBUTTONDOWN:
                 self.state.button1 = True if ev.button == 0 else self.state.button1
                 self.state.button2 = True if ev.button == 1 else self.state.button2
+                self.state.button3 = True if ev.button == 2 else self.state.button3
+                self.state.button4 = True if ev.button == 3 else self.state.button4
 
         #    self.__show_events(events)
 
@@ -57,10 +61,14 @@ class Joystick:
             self.down = False
             self.button1 = False
             self.button2 = False
+            self.button3 = False
+            self.button4 = False
 
         def __str__(self):
-            return "up:{0} left:{1} right:{2} down:{3} BTN1:{4} BTN2:{5}".format(
-                T(self.up), T(self.left), T(self.right), T(self.down), T(self.button1), T(self.button2))
+            return "up:{0} left:{1} right:{2} down:{3} BTN1:{4} BTN2:{5} BTN3:{6} BTN4:{7}".format(
+                T(self.up), T(self.left), T(self.right), T(self.down),
+                T(self.button1), T(self.button2), T(self.button3), T(self.button4))
+
 
 def main():
     pygame.init()
