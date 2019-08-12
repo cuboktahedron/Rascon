@@ -5,12 +5,67 @@ import os
 import pygame
 import traceback
 
+class Layer:
+    def __init__(self, lifegame, color):
+        self._lifegame = lifegame
+        self._color = color
+
+    def action(self):
+        self._lifegame.next()
+
+    def color(self):
+        return self._color
+
+    def get_cells(self):
+        return self._lifegame.get_cells()
+
+    def flip(self, x, y):
+        status = self._lifegame.get(x, y)
+        self._lifegame.set(x, y, not status)
+
+class Layers:
+    def __init__(self):
+        self.layers = []
+        self._selected_layer_num = -1
+
+    def action(self):
+        for layer in self.layers:
+            layer.action()
+
+    def add(self, lifegame, color):
+        self.layers.append(Layer(lifegame, color));
+
+    def selected_layer(self):
+        if self._selected_layer_num < 0:
+            return None
+        else:
+            return self.layers[self._selected_layer_num]
+
+    def switch_layer(self):
+        self._selected_layer_num = (self._selected_layer_num + 1)
+        if self._selected_layer_num >= len(self.layers):
+            self._selected_layer_num = -1
+
+    def merge_cells(self):
+        merged_cells = [[0 for x in range(0, LifeGameMain.WIDTH)] for y in range(0, LifeGameMain.HEIGHT)]
+        for layer in self.layers:
+            cells = layer.get_cells()
+            color = layer.color()
+            for y in range(0, LifeGameMain.WIDTH):
+                for x in range(0, LifeGameMain.HEIGHT):
+                    if cells[y][x]:
+                        merged_cells[y][x] |= color
+
+        return merged_cells
+
 class LifeGameMain:
     WIDTH = 16
     HEIGHT = 16
 
     def __init__(self, lm, joy):
-        self._lifegame = LifeGame(LifeGameMain.WIDTH, LifeGameMain.HEIGHT)
+        self._layers = Layers()
+        self._layers.add(LifeGame(LifeGameMain.WIDTH, LifeGameMain.HEIGHT), 1)
+        self._layers.add(LifeGame(LifeGameMain.WIDTH, LifeGameMain.HEIGHT), 2)
         self._lm = lm
         self._joy = joy
 
@@ -24,7 +79,7 @@ class LifeGameMain:
         while True:
             self._joy.refresh()
             if not self._pause:
-                self._lifegame.next()
+                self._layers.action()
 
             self._action()
             self._draw()
@@ -47,15 +102,19 @@ class LifeGameMain:
         self._cursor = (x, y)
 
         if state.button1.down():
-            status = self._lifegame.get(x, y)
-            self._lifegame.set(x, y, not status)
-            self._pause = True
+            target = self._layers.selected_layer()
+            if not target == None:
+                status = target.flip(x, y)
+                self._pause = True
+        if state.button2.down():
+            self._layers.switch_layer()
         if state.button4.down():
             self._pause = not self._pause;
 
     def _draw(self):
-       cells = self._lifegame.get_cells()
        print(chr(27) + "[2J")
+
+       cells = self._layers.merge_cells()
 
        for y in range(0, LifeGameMain.WIDTH):
            for x in range(0, LifeGameMain.HEIGHT):
@@ -63,7 +122,7 @@ class LifeGameMain:
                if self._cursor == (x, ry):
                    color = 7
                else:
-                   color = 2 if cells[ry][x] else 0
+                   color = cells[ry][x]
 #               self._ctx.dot(x, y, color)
                print(color, end="")
            print ("")
