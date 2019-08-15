@@ -1,7 +1,6 @@
 from joystick import Joystick
 from ledmatrix import LedMatrix
 from lifegame import LifeGame
-import os
 import pygame
 import traceback
 
@@ -51,8 +50,8 @@ class Layers:
         for layer in self.layers:
             cells = layer.get_cells()
             color = layer.color()
-            for y in range(0, LifeGameMain.WIDTH):
-                for x in range(0, LifeGameMain.HEIGHT):
+            for y in range(0, LifeGameMain.HEIGHT):
+                for x in range(0, LifeGameMain.WIDTH):
                     if cells[y][x]:
                         merged_cells[y][x] |= color
 
@@ -112,20 +111,34 @@ class LifeGameMain:
             self._pause = not self._pause;
 
     def _draw(self):
-       print(chr(27) + "[2J")
+        cells = self._layers.merge_cells()
 
-       cells = self._layers.merge_cells()
+        for y in range(0, LifeGameMain.HEIGHT):
+            for x in range(0, LifeGameMain.WIDTH):
+                ry = 15 - y
+                if self._cursor == (x, ry):
+                    color = 7
+                else:
+                    color = cells[ry][x]
+                self._ctx.dot(x, ry, color)
 
-       for y in range(0, LifeGameMain.WIDTH):
-           for x in range(0, LifeGameMain.HEIGHT):
-               ry = 15 - y
-               if self._cursor == (x, ry):
-                   color = 7
-               else:
-                   color = cells[ry][x]
-#               self._ctx.dot(x, y, color)
-               print(color, end="")
-           print ("")
+        self._draw_text()
+
+    def _draw_text(self):
+        print(chr(27) + "[2J")
+
+        cells = self._layers.merge_cells()
+
+        for y in range(0, LifeGameMain.HEIGHT):
+            for x in range(0, LifeGameMain.WIDTH):
+                ry = 15 - y
+                if self._cursor == (x, ry):
+                    color = 7
+                else:
+                    color = cells[ry][x]
+                print(color, end="")
+            print ("")
+
 
 def main():
     lm = LedMatrix()
