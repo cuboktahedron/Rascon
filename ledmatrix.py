@@ -93,29 +93,29 @@ class LedMatrix:
             self.select_section(section)
             GPIO.output(LedMatrix.OE_PORT, 1)
 
-        for i in range(8):
-            self.__set_color1(self.context.screen[section][i + 8])
-            self.__set_color2(self.context.screen[section + 8][i + 8])
-            self.__clock()
+            for i in range(8):
+                self.__set_color1(self.context.screen[section][i + 8])
+                self.__set_color2(self.context.screen[section + 8][i + 8])
+                self.__clock()
 
-        for i in range(8):
-            self.__set_color1(self.context.screen[section + 4][15 - i])
-            self.__set_color2(self.context.screen[section + 12][15 - i])
-            self.__clock()
+            for i in range(8):
+                self.__set_color1(self.context.screen[section + 4][15 - i])
+                self.__set_color2(self.context.screen[section + 12][15 - i])
+                self.__clock()
 
-        for i in range(8):
-            self.__set_color1(self.context.screen[section][i])
-            self.__set_color2(self.context.screen[section + 8][i])
-            self.__clock()
+            for i in range(8):
+                self.__set_color1(self.context.screen[section][i])
+                self.__set_color2(self.context.screen[section + 8][i])
+                self.__clock()
 
-        for i in range(8):
-            self.__set_color1(self.context.screen[section + 4][7 - i])
-            self.__set_color2(self.context.screen[section + 12][7 - i])
-            self.__clock()
+            for i in range(8):
+                self.__set_color1(self.context.screen[section + 4][7 - i])
+                self.__set_color2(self.context.screen[section + 12][7 - i])
+                self.__clock()
 
-        self.__latch()
-        GPIO.output(LedMatrix.OE_PORT, 0)
-        time.sleep(delay)
+            self.__latch()
+            GPIO.output(LedMatrix.OE_PORT, 0)
+            time.sleep(delay)
 
 class LedMatrixContext:
     SIZE = 16
