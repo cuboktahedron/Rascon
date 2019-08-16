@@ -68,7 +68,7 @@ class LifeGameMain:
         self._lm = lm
         self._joy = joy
 
-        self._lm.set_fps(10)
+        self._lm.set_fps(60)
         self._ctx = lm.getContext()
 
         self._cursor = (0, 0)

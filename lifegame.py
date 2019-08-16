@@ -1,10 +1,13 @@
 import copy
+from datetime import datetime
 
 class LifeGame:
   def __init__(self, width, height):
     self.width = width
     self.height = height
     self.cells = [[False for x in range(0, width)] for y in range(0, height)]
+    self.fps = 2
+    self._next_ts = datetime.now().timestamp()
 
   def set(self, x, y, status):
     self.cells[y][x] = status
@@ -13,6 +16,12 @@ class LifeGame:
     return self.cells[y][x]
 
   def next(self):
+    cur_ts = datetime.now().timestamp()
+    if cur_ts < self._next_ts:
+      return
+
+    self._next_ts = cur_ts + (1 / self.fps)
+
     nextCells = [[False for x in range(0, self.width)] for y in range(0, self.height)]
 
     for x in range(0, self.width):
