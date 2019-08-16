@@ -57,6 +57,58 @@ class Layers:
 
         return merged_cells
 
+class Cursor:
+    __INITIAL_ACTIVE_COUNT = 30
+
+    def __init__(self, color):
+        self.__color = color
+        self.__coords = (0, 0)
+        self.__width = LifeGameMain.WIDTH
+        self.__height = LifeGameMain.HEIGHT
+        self.__active_count = Cursor.__INITIAL_ACTIVE_COUNT
+
+    def get_color(self):
+        return self.__color
+
+    def get_coords(self):
+        return self.__coords
+
+    def up(self):
+        (x, y) = (self.__coords)
+        y = y + 1 if y < self.__height - 1 else 0
+        self.__coords = (x, y)
+        self.activate()
+
+    def down(self):
+        (x, y) = (self.__coords)
+        y = y - 1 if y > 0 else self.__height - 1
+        self.__coords = (x, y)
+        self.activate()
+
+    def left(self):
+        (x, y) = (self.__coords)
+        x = x - 1 if x > 0 else self.__width - 1
+        self.__coords = (x, y)
+        self.activate()
+
+    def right(self):
+        (x, y) = (self.__coords)
+        x = x + 1 if x < self.__width - 1 else 0
+        self.__coords = (x, y)
+        self.activate()
+
+    def next(self):
+        self.__active_count -= 1
+
+    def activate(self):
+        self.__active_count = Cursor.__INITIAL_ACTIVE_COUNT
+
+    def is_visible(self):
+        if self.__active_count > 0:
+            return True
+        else:
+            return False
+
 class LifeGameMain:
     WIDTH = 16
     HEIGHT = 16
@@ -71,7 +123,7 @@ class LifeGameMain:
         self._lm.set_fps(60)
         self._ctx = lm.getContext()
 
-        self._cursor = (0, 0)
+        self._cursor = Cursor(7)
         self._pause = True
 
     def start(self):
@@ -89,23 +141,25 @@ class LifeGameMain:
         self._interact(state)
 
     def _interact(self, state):
-        (x, y) = self._cursor
+        self._cursor.next()
         if state.up.pressed():
-            y = y + 1 if y < LifeGameMain.HEIGHT - 1 else 0
+            self._cursor.up()
         if state.down.pressed():
-            y = y - 1 if y > 0 else LifeGameMain.HEIGHT - 1
+            self._cursor.down()
         if state.left.pressed():
-            x = x - 1 if x > 0 else LifeGameMain.WIDTH - 1
+            self._cursor.left()
         if state.right.pressed():
-            x = x + 1 if x < LifeGameMain.WIDTH - 1 else 0
-        self._cursor = (x, y)
+            self._cursor.right()
+        (x, y) = self._cursor.get_coords()
 
         if state.button1.down():
+            self._cursor.activate()
             target = self._layers.selected_layer()
             if not target == None:
                 status = target.flip(x, y)
                 self._pause = True
         if state.button2.down():
+            self._cursor.activate()
             self._layers.switch_layer()
         if state.button4.down():
             self._pause = not self._pause;
@@ -116,8 +170,8 @@ class LifeGameMain:
         for y in range(0, LifeGameMain.HEIGHT):
             for x in range(0, LifeGameMain.WIDTH):
                 ry = 15 - y
-                if self._cursor == (x, ry):
-                    color = 7
+                if self._cursor.is_visible() and self._cursor.get_coords() == (x, ry):
+                    color = self._cursor.get_color()
                 else:
                     color = cells[ry][x]
                 self._ctx.dot(x, ry, color)
@@ -132,8 +186,8 @@ class LifeGameMain:
         for y in range(0, LifeGameMain.HEIGHT):
             for x in range(0, LifeGameMain.WIDTH):
                 ry = 15 - y
-                if self._cursor == (x, ry):
-                    color = 7
+                if self._cursor.is_visible() and self._cursor.get_coords() == (x, ry):
+                    color = self._cursor.get_color()
                 else:
                     color = cells[ry][x]
                 print(color, end="")
