@@ -6,48 +6,48 @@ import traceback
 
 class Layer:
     def __init__(self, lifegame, color):
-        self._lifegame = lifegame
-        self._color = color
+        self.__lifegame = lifegame
+        self.__color = color
 
     def action(self):
-        self._lifegame.next()
+        self.__lifegame.next()
 
     def color(self):
-        return self._color
+        return self.__color
 
     def get_cells(self):
-        return self._lifegame.get_cells()
+        return self.__lifegame.get_cells()
 
     def flip(self, x, y):
-        status = self._lifegame.get(x, y)
-        self._lifegame.set(x, y, not status)
+        status = self.__lifegame.get(x, y)
+        self.__lifegame.set(x, y, not status)
 
 class Layers:
     def __init__(self):
-        self.layers = []
-        self._selected_layer_num = -1
+        self.__layers = []
+        self.__selected_layer_num = -1
 
     def action(self):
-        for layer in self.layers:
+        for layer in self.__layers:
             layer.action()
 
     def add(self, lifegame, color):
-        self.layers.append(Layer(lifegame, color));
+        self.__layers.append(Layer(lifegame, color));
 
     def selected_layer(self):
-        if self._selected_layer_num < 0:
+        if self.__selected_layer_num < 0:
             return None
         else:
-            return self.layers[self._selected_layer_num]
+            return self.__layers[self.__selected_layer_num]
 
     def switch_layer(self):
-        self._selected_layer_num = (self._selected_layer_num + 1)
-        if self._selected_layer_num >= len(self.layers):
-            self._selected_layer_num = -1
+        self.__selected_layer_num = (self.__selected_layer_num + 1)
+        if self.__selected_layer_num >= len(self.__layers):
+            self.__selected_layer_num = -1
 
     def merge_cells(self):
         merged_cells = [[0 for x in range(0, LifeGameMain.WIDTH)] for y in range(0, LifeGameMain.HEIGHT)]
-        for layer in self.layers:
+        for layer in self.__layers:
             cells = layer.get_cells()
             color = layer.color()
             for y in range(0, LifeGameMain.HEIGHT):
@@ -114,13 +114,13 @@ class LifeGameMain:
     HEIGHT = 16
 
     def __init__(self, lm, joy):
-        self._layers = Layers()
-        self._layers.add(LifeGame(LifeGameMain.WIDTH, LifeGameMain.HEIGHT), 1)
-        self._layers.add(LifeGame(LifeGameMain.WIDTH, LifeGameMain.HEIGHT), 2)
-        self._lm = lm
-        self._joy = joy
+        self.__layers = Layers()
+        self.__layers.add(LifeGame(LifeGameMain.WIDTH, LifeGameMain.HEIGHT), 1)
+        self.__layers.add(LifeGame(LifeGameMain.WIDTH, LifeGameMain.HEIGHT), 2)
+        self.__lm = lm
+        self.__joy = joy
 
-        self._lm.set_fps(60)
+        self.__lm.set_fps(60)
         self._ctx = lm.getContext()
 
         self._cursor = Cursor(7)
@@ -128,19 +128,19 @@ class LifeGameMain:
 
     def start(self):
         while True:
-            self._joy.refresh()
+            self.__joy.refresh()
             if not self._pause:
-                self._layers.action()
+                self.__layers.action()
 
-            self._action()
-            self._draw()
-            self._lm.refresh()
+            self.__action()
+            self.__draw()
+            self.__lm.refresh()
 
-    def _action(self):
-        state = self._joy.state
-        self._interact(state)
+    def __action(self):
+        state = self.__joy.state
+        self.__interact(state)
 
-    def _interact(self, state):
+    def __interact(self, state):
         self._cursor.next()
         if state.up.pressed():
             self._cursor.up()
@@ -154,18 +154,18 @@ class LifeGameMain:
 
         if state.button1.down():
             self._cursor.activate()
-            target = self._layers.selected_layer()
+            target = self.__layers.selected_layer()
             if not target == None:
                 status = target.flip(x, y)
                 self._pause = True
         if state.button2.down():
             self._cursor.activate()
-            self._layers.switch_layer()
+            self.__layers.switch_layer()
         if state.button4.down():
             self._pause = not self._pause;
 
-    def _draw(self):
-        cells = self._layers.merge_cells()
+    def __draw(self):
+        cells = self.__layers.merge_cells()
 
         for y in range(0, LifeGameMain.HEIGHT):
             for x in range(0, LifeGameMain.WIDTH):
@@ -176,12 +176,12 @@ class LifeGameMain:
                     color = cells[ry][x]
                 self._ctx.dot(x, ry, color)
 
-        self._draw_text()
+        self.__draw_text()
 
-    def _draw_text(self):
+    def __draw_text(self):
         print(chr(27) + "[2J")
 
-        cells = self._layers.merge_cells()
+        cells = self.__layers.merge_cells()
 
         for y in range(0, LifeGameMain.HEIGHT):
             for x in range(0, LifeGameMain.WIDTH):
